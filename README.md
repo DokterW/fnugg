@@ -13,6 +13,11 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 
 ### Changelog
 
+#### 2017-06-19
+* Added UV Index for current forecast with level indicator.
+* Added humidity for current forecast.
+* Added precipitation forecast for the 5-day forecast.
+
 #### 2017-06-09
 * Added ability to fetch coordinates from [Mapbox](https://www.mapbox.com) instead of having to look them up manually and add them to a (CSV) list. (You need an API key from Mapbox)
 

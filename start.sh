@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.20
+# fnugg v0.21
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.20"
+FNUVER="0.21"
 FNUDIR="$HOME/.dokter/fnugg"
 # Your API key for darksky.net
 # FNUSKY=""
@@ -182,6 +182,17 @@ while :; do
             FNUHUM=$(echo "$FNUHUM*100" | bc | sed 's/\.00//')
             FNUWND=$(echo "$FNUSKYAPI" | jq -r '.currently.windSpeed')
             FNUSUM=$(echo "$FNUSKYAPI" | jq -r '.currently.summary')
+            if [ "$FNUUVI" = "0" ] || [ "$FNUUVI" = "1" ] || [ "$FNUUVI" = "2" ]; then
+                FNUUVIRSK="Low"
+            elif [ "$FNUUVI" = "3" ] || [ "$FNUUVI" = "4" ] || [ "$FNUUVI" = "5" ]; then
+                FNUUVIRSK="Moderate"
+            elif [ "$FNUUVI" = "6" ] || [ "$FNUUVI" = "7" ]; then
+                FNUUVIRSK="High"
+            elif [ "$FNUUVI" = "8" ] || [ "$FNUUVI" = "9" ] || [ "$FNUUVI" = "10" ]; then
+                FNUUVIRSK="Very high"
+            elif [ "$FNUUVI" -ge "11" ]; then
+                FNUUVIRSK="Extreme"
+            fi
             # Today
             FNUTMPW1K0=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].temperatureMax')
             FNUTMPW2K0=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].temperatureMin')
@@ -222,7 +233,7 @@ while :; do
             echo "               $FNULOC" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
             echo "  Temperature: $FNUTMP°C"
             echo "   Feels like: $FNUTFL°C"
-            echo "     UV Index: $FNUUVI"
+            echo "     UV Index: $FNUUVI ($FNUUVIRSK)"
             echo "     Humidity: $FNUHUM%"
             echo "         Wind: $FNUWND m/s"
             echo -n "      Summary:"
