@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.17
+# fnugg v0.18
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.17"
+FNUVER="0.18"
 FNUDIR="$HOME/.dokter/fnugg"
 # Your API key for darksky.net
 # FNUSKY=""
@@ -103,6 +103,19 @@ elif [ ! -e /usr/bin/fmt ]; then
 fi
 # -----------------------------------------------------------------------------------
 while :; do
+    clear
+    echo "$FNUNAM - v$FNUVER :: powered by darksky.net"
+    echo ""
+    echo "Press any key to check the weather"
+    echo "Q. Quit"
+    echo ""
+    read -p "Enter option: " -s -n1 FNUKEY
+    if [ "$FNUKEY" = "q" ] || [ "$FNUKEY" = "Q" ]; then
+        clear
+        break
+    else
+        FNUKEY=""
+    fi
     while :; do
         if [ -n "$FNUSRC" ]; then
             break
