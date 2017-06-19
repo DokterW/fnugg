@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.18
+# fnugg v0.20
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.18"
+FNUVER="0.20"
 FNUDIR="$HOME/.dokter/fnugg"
 # Your API key for darksky.net
 # FNUSKY=""
@@ -177,6 +177,9 @@ while :; do
             # Current
             FNUTMP=$(echo "$FNUSKYAPI" | jq -r '.currently.temperature')
             FNUTFL=$(echo "$FNUSKYAPI" | jq -r '.currently.apparentTemperature')
+            FNUUVI=$(echo "$FNUSKYAPI" | jq -r '.currently.uvIndex')
+            FNUHUM=$(echo "$FNUSKYAPI" | jq -r '.currently.humidity')
+            FNUHUM=$(echo "$FNUHUM*100" | bc | sed 's/\.00//')
             FNUWND=$(echo "$FNUSKYAPI" | jq -r '.currently.windSpeed')
             FNUSUM=$(echo "$FNUSKYAPI" | jq -r '.currently.summary')
             # Today
@@ -219,6 +222,8 @@ while :; do
             echo "               $FNULOC" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
             echo "  Temperature: $FNUTMP°C"
             echo "   Feels like: $FNUTFL°C"
+            echo "     UV Index: $FNUUVI"
+            echo "     Humidity: $FNUHUM%"
             echo "         Wind: $FNUWND m/s"
             echo -n "      Summary:"
             echo "               $FNUSUM" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
@@ -251,7 +256,15 @@ while :; do
                         FNUDAYWEK[$FNUCANT]=$(echo "${FNUDAYWEK[$FNUCANT]^}")
                         FNUTMPW1K[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].temperatureMax")
                         FNUTMPW2K[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].temperatureMin")
+                        FNUPRPWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipProbability")
+                        FNUPRPWEK[$FNUCANT]=$(echo "${FNUPRPWEK[$FNUCANT]}*100" | bc | sed 's/\.00//')
+                        FNUPRTWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipType")
                         FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
+                        if [ "${FNUPRTWEK[$FNUCANT]}" = "null" ]; then
+                            FNUPRTWEK[$FNUCANT]=""
+                        else
+                            FNUPRTWEK[$FNUCANT]=$(echo "chance of ${FNUPRTWEK[$FNUCANT]}")
+                        fi
                     done
                     FNUCANT=1
                     clear
@@ -264,6 +277,7 @@ while :; do
                         FNUCANT=$(expr $FNUCANT + 1)
                         echo ":: ${FNUDAYWEK[$FNUCANT]} ::"
                         echo "  Temperature: ${FNUTMPW1K[$FNUCANT]}°C (${FNUTMPW2K[$FNUCANT]}°C)"
+                        echo "Precipitation: ${FNUPRPWEK[$FNUCANT]}% ${FNUPRTWEK[$FNUCANT]}"
                         echo -n "      Summary:"
                         echo "               ${FNUSUMWEK[$FNUCANT]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
                         echo ""
