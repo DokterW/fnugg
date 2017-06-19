@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.21
+# fnugg v0.22
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.21"
+FNUVER="0.22"
 FNUDIR="$HOME/.dokter/fnugg"
 # Your API key for darksky.net
 # FNUSKY=""
@@ -228,9 +228,10 @@ while :; do
             clear
             echo "$FNUNAM - v$FNUVER :: powered by darksky.net"
             echo ""
-            echo ":: Current ::"
             echo -n "     Location:"
             echo "               $FNULOC" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
+            echo ""
+            echo ":: Current ::"
             echo "  Temperature: $FNUTMP°C"
             echo "   Feels like: $FNUTFL°C"
             echo "     UV Index: $FNUUVI ($FNUUVIRSK)"
@@ -281,7 +282,7 @@ while :; do
                     clear
                     echo "$FNUNAM - v$FNUVER :: powered by darksky.net"
                     echo ""
-                    echo -n "Location:"
+                    echo -n "      Location:"
                     echo "               $FNULOC" | fmt -w $FNUCOL -c | sed -r '1s/^\s{10}/ /'
                     echo ""
                     until [ "$FNUCANT" -eq "6" ]; do
