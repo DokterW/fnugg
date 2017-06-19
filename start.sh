@@ -272,7 +272,7 @@ while :; do
                 ;;
                 [qQ])
                     clear
-                    exit
+                    break
                 ;;
                 *)
                     continue
