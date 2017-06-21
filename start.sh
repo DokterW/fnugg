@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.23
+# fnugg v0.25
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.23"
+FNUVER="0.25"
 FNUDIR="$HOME/.dokter/fnugg"
 # Your API key for darksky.net
 # FNUSKY=""
@@ -117,9 +117,9 @@ while :; do
         FNUKEY=""
     fi
     while :; do
-        if [ -n "$FNUSRC" ]; then
-            break
-        fi
+#        if [ -n "$FNUSRC" ]; then
+#            break
+#        fi
         clear
         echo "$FNUNAM - v$FNUVER :: powered by darksky.net"
         echo ""
@@ -161,9 +161,9 @@ while :; do
                 # Location
                 FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name")
                 # Latitude
-                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].geometry.coordinates[1]")
+                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[1]")
                 # Longitude
-                FNULON=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].geometry.coordinates[0]")
+                FNULON=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
             ;;
             [qQ])
                 clear
@@ -181,17 +181,36 @@ while :; do
             FNUHUM=$(echo "$FNUSKYAPI" | jq -r '.currently.humidity')
             FNUHUM=$(echo "$FNUHUM*100" | bc | sed 's/\.00//')
             FNUWND=$(echo "$FNUSKYAPI" | jq -r '.currently.windSpeed')
+            FNUBRN=$(echo "$FNUSKYAPI" | jq -r '.currently.windBearing')
+            FNUGST=$(echo "$FNUSKYAPI" | jq -r '.currently.windGust')
             FNUSUM=$(echo "$FNUSKYAPI" | jq -r '.currently.summary')
-            if [ "$FNUUVI" = "0" ] || [ "$FNUUVI" = "1" ] || [ "$FNUUVI" = "2" ]; then
+            if [[ "$FNUUVI" -ge "0" && "$FNUUVI" -le "2" ]]; then
                 FNUUVIRSK="Low"
-            elif [ "$FNUUVI" = "3" ] || [ "$FNUUVI" = "4" ] || [ "$FNUUVI" = "5" ]; then
+            elif [[ "$FNUUVI" -ge "3" && "$FNUUVI" -le "5" ]]; then
                 FNUUVIRSK="Moderate"
-            elif [ "$FNUUVI" = "6" ] || [ "$FNUUVI" = "7" ]; then
+            elif [[ "$FNUUVI" -ge "6" && "$FNUUVI" -le "7" ]]; then
                 FNUUVIRSK="High"
-            elif [ "$FNUUVI" = "8" ] || [ "$FNUUVI" = "9" ] || [ "$FNUUVI" = "10" ]; then
+            elif [[ "$FNUUVI" -ge "8" && "$FNUUVI" -le "10" ]]; then
                 FNUUVIRSK="Very high"
-            elif [ "$FNUUVI" -ge "11" ]; then
+            elif [[ "$FNUUVI" -ge "11" ]]; then
                 FNUUVIRSK="Extreme"
+            fi
+            if [[ "$FNUBRN" -eq "0" ]]; then
+                FNUBRN="N"
+            elif [[ "$FNUBRN" -ge "1" && "$FNUBRN" -le "89" ]]; then
+                FNUBRN="NE"
+            elif [[ "$FNUBRN" -eq "90" ]]; then
+                FNUBRN="E"
+            elif [[ "$FNUBRN" -ge "91" && "$FNUBRN" -le "179" ]]; then
+                FNUBRN="SE"
+            elif [[ "$FNUBRN" -eq "180" ]]; then
+                FNUBRN="S"
+            elif [[ "$FNUBRN" -ge "181" && "$FNUBRN" -le "269" ]]; then
+                FNUBRN="SW"
+            elif [[ "$FNUBRN" -eq "270" ]]; then
+                FNUBRN="W"
+            elif [[ "$FNUBRN" -ge "271" && "$FNUBRN" -le "359" ]]; then
+                FNUBRN="NW"
             fi
             # Today
             FNUTMPW1K0=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].temperatureMax')
@@ -236,7 +255,7 @@ while :; do
             echo "   Feels like: $FNUTFL°C"
             echo "     UV Index: $FNUUVI ($FNUUVIRSK)"
             echo "     Humidity: $FNUHUM%"
-            echo "         Wind: $FNUWND m/s"
+            echo "         Wind: $FNUWND m/s ($FNUGST m/s) $FNUBRN"
             echo -n "      Summary:"
             echo "               $FNUSUM" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
             echo ""

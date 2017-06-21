@@ -13,6 +13,10 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 
 ### Changelog
 
+#### 2017-06-21
+* Added gust and bearing
+* If you quit you will be asked to search for a new location instead of being shown the previous search results.
+
 #### 2017-06-19
 * Added UV Index for current forecast with level indicator.
 * Added humidity for current forecast.
