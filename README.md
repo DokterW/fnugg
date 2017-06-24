@@ -13,6 +13,10 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 
 ### Changelog
 
+#### 2017-06-2x
+* If the city name has a space in it, add underscore.
+* If the city name has ÅÄÖ or ÆØÅ in it, change it to OAA.
+
 #### 2017-06-21
 * Added gust and bearing
 * If you quit you will be asked to search for a new location instead of being shown the previous search results.
