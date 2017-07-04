@@ -13,7 +13,11 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 
 ### Changelog
 
-#### 2017-06-2x
+#### 2017-07-04
+* If only one city is found it will continue directly to the forecast, skipping the options menu.
+* If you make a typo or the city is wrong, it will return to the main menu.
+
+#### 2017-06-23
 * If the city name has a space in it, add underscore.
 * If the city name has ÅÄÖ or ÆØÅ in it, change it to OAA.
 
