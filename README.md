@@ -16,6 +16,8 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 #### 2017-07-04
 * If only one city is found it will continue directly to the forecast, skipping the options menu.
 * If you make a typo or the city is wrong, it will return to the main menu.
+* Main menu now is the search menu.
+* Added wind to the daily forecasts.
 
 #### 2017-06-23
 * If the city name has a space in it, add underscore.

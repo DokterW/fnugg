@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.27
+# fnugg v0.28
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.27"
+FNUVER="0.28"
 FNUDIR="$HOME/.dokter/fnugg"
 # Your API key for darksky.net
 # FNUSKY=""
@@ -103,23 +103,24 @@ elif [ ! -e /usr/bin/fmt ]; then
 fi
 # -----------------------------------------------------------------------------------
 while :; do
-    clear
-    echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
-    echo ""
-    echo "Press any key to check the weather"
-    echo -n "Q. Quit "
-    read -p "" -s -n1 FNUKEY
-    if [ "$FNUKEY" = "q" ] || [ "$FNUKEY" = "Q" ]; then
-        clear
-        break
-    else
-        FNUKEY=""
-    fi
+#    clear
+#    echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+#    echo ""
+#    echo "Press any key to check the weather"
+#    echo -n "Q. Quit "
+#    read -p "" -s -n1 FNUKEY
+#    if [ "$FNUKEY" = "q" ] || [ "$FNUKEY" = "Q" ]; then
+#        clear
+#        break
+#    else
+#        FNUKEY=""
+#    fi
     while :; do
         clear
         echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
         echo ""
-        read -p "Search for city: " FNUSRC
+        echo "Search for city or (q)uit:"
+        read -p "> " FNUSRC
         # If the city name has a space in it, add underscore. If the city name has ÅÄÖ or ÆØÅ in it, change it to OAA.
         FNUSRC=$(echo $FNUSRC | sed -r 's/\s/_/' | sed -r 's/[æÆ]/a/' | sed -r 's/[øØ]/o/' | sed -r 's/[åÅ]/a/' | sed -r 's/[äÄ]/a/' | sed -r 's/[öÖ]/o/')
         # Semi-secret way to quit.
@@ -234,6 +235,27 @@ while :; do
                     else
                         FNUPRTTOD=$(echo "chance of $FNUPRTTOD")
                     fi
+                    FNUWNDTOD=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].windSpeed')
+                    FNUBRNTOD=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].windBearing')
+                    if [[ "$FNUBRNTOD" -eq "null" ]]; then
+                        FNUBRNTOD=""
+                    elif [[ "$FNUBRNTOD" -eq "0" ]]; then
+                        FNUBRNTOD="N"
+                    elif [[ "$FNUBRNTOD" -ge "1" && "$FNUBRNTOD" -le "89" ]]; then
+                        FNUBRNTOD="NE"
+                    elif [[ "$FNUBRNTOD" -eq "90" ]]; then
+                        FNUBRNTOD="E"
+                    elif [[ "$FNUBRNTOD" -ge "91" && "$FNUBRNTOD" -le "179" ]]; then
+                        FNUBRNTOD="SE"
+                    elif [[ "$FNUBRNTOD" -eq "180" ]]; then
+                        FNUBRNTOD="S"
+                    elif [[ "$FNUBRNTOD" -ge "181" && "$FNUBRNTOD" -le "269" ]]; then
+                        FNUBRNTOD="SW"
+                    elif [[ "$FNUBRNTOD" -eq "270" ]]; then
+                        FNUBRNTOD="W"
+                    elif [[ "$FNUBRNTOD" -ge "271" && "$FNUBRNTOD" -le "359" ]]; then
+                        FNUBRNTOD="NW"
+                    fi
                     FNUSNRTOD=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].sunriseTime')
                     FNUSNRTOD=$(TZ=$FNUTIZ date --date="@$FNUSNRTOD" +%H:%M)
                     FNUSNSTOD=$(echo "$FNUSKYAPI" | jq -r '.daily.data[0].sunsetTime')
@@ -249,6 +271,27 @@ while :; do
                         FNUPRTTOM=""
                     else
                         FNUPRTTOM=$(echo "chance of $FNUPRTTOM")
+                    fi
+                    FNUWNDTOM=$(echo "$FNUSKYAPI" | jq -r '.daily.data[1].windSpeed')
+                    FNUBRNTOM=$(echo "$FNUSKYAPI" | jq -r '.daily.data[1].windBearing')
+                    if [[ "$FNUBRNTOM" -eq "null" ]]; then
+                        FNUBRNTOM=""
+                    elif [[ "$FNUBRNTOM" -eq "0" ]]; then
+                        FNUBRNTOM="N"
+                    elif [[ "$FNUBRNTOM" -ge "1" && "$FNUBRNTOM" -le "89" ]]; then
+                        FNUBRNTOM="NE"
+                    elif [[ "$FNUBRNTOM" -eq "90" ]]; then
+                        FNUBRNTOM="E"
+                    elif [[ "$FNUBRNTOM" -ge "91" && "$FNUBRNTOM" -le "179" ]]; then
+                        FNUBRNTOM="SE"
+                    elif [[ "$FNUBRNTOM" -eq "180" ]]; then
+                        FNUBRNTOM="S"
+                    elif [[ "$FNUBRNTOM" -ge "181" && "$FNUBRNTOM" -le "269" ]]; then
+                        FNUBRNTOM="SW"
+                    elif [[ "$FNUBRNTOM" -eq "270" ]]; then
+                        FNUBRNTOM="W"
+                    elif [[ "$FNUBRNTOM" -ge "271" && "$FNUBRNTOM" -le "359" ]]; then
+                        FNUBRNTOM="NW"
                     fi
                     FNUSNRTOM=$(echo "$FNUSKYAPI" | jq -r '.daily.data[1].sunriseTime')
                     FNUSNRTOM=$(TZ=$FNUTIZ date --date="@$FNUSNRTOM" +%H:%M)
@@ -273,6 +316,7 @@ while :; do
                     echo ":: Today ::"
                     echo "  Temperature: $FNUTMPW1K0°C ($FNUTMPW2K0°C)"
                     echo "Precipitation: $FNUPRPTOD% $FNUPRTTOD"
+                    echo "         Wind: $FNUWNDTOD m/s $FNUBRNTOD"
                     echo "      Sunrise: $FNUSNRTOD"
                     echo "       Sunset: $FNUSNSTOD"
                     echo -n "      Summary:"
@@ -281,6 +325,7 @@ while :; do
                     echo ":: Tomorrow ::"
                     echo "  Temperature: $FNUTMPW1K1°C ($FNUTMPW2K1°C)"
                     echo "Precipitation: $FNUPRPTOM% $FNUPRTTOM"
+                    echo "         Wind: $FNUWNDTOM m/s $FNUBRNTOM"
                     echo "      Sunrise: $FNUSNRTOM"
                     echo "       Sunset: $FNUSNSTOM"
                     echo -n "      Summary:"
@@ -301,12 +346,33 @@ while :; do
                                 FNUPRPWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipProbability")
                                 FNUPRPWEK[$FNUCANT]=$(echo "${FNUPRPWEK[$FNUCANT]}*100" | bc | sed 's/\.00//')
                                 FNUPRTWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipType")
-                                FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
                                 if [ "${FNUPRTWEK[$FNUCANT]}" = "null" ]; then
                                     FNUPRTWEK[$FNUCANT]=""
                                 else
                                     FNUPRTWEK[$FNUCANT]=$(echo "chance of ${FNUPRTWEK[$FNUCANT]}")
                                 fi
+                                FNUWNDWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].windSpeed")
+                                FNUBRNWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].windBearing")
+                                if [[ "${FNUBRNWEK[$FNUCANT]}" -eq "null" ]]; then
+                                    FNUBRNWEK[$FNUCANT]=""
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "0" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="N"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "1" && "${FNUBRNWEK[$FNUCANT]}" -le "89" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="NE"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "90" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="E"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "91" && "${FNUBRNWEK[$FNUCANT]}" -le "179" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="SE"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "180" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="S"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "181" && "${FNUBRNWEK[$FNUCANT]}" -le "269" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="SW"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "270" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="W"
+                                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "271" && "${FNUBRNWEK[$FNUCANT]}" -le "359" ]]; then
+                                    FNUBRNWEK[$FNUCANT]="NW"
+                                fi
+                                FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
                             done
                             FNUCANT=1
                             clear
@@ -320,6 +386,7 @@ while :; do
                                 echo ":: ${FNUDAYWEK[$FNUCANT]} ::"
                                 echo "  Temperature: ${FNUTMPW1K[$FNUCANT]}°C (${FNUTMPW2K[$FNUCANT]}°C)"
                                 echo "Precipitation: ${FNUPRPWEK[$FNUCANT]}% ${FNUPRTWEK[$FNUCANT]}"
+                                echo "         Wind: ${FNUWNDWEK[$FNUCANT]} m/s ${FNUBRNWEK[$FNUCANT]}"
                                 echo -n "      Summary:"
                                 echo "               ${FNUSUMWEK[$FNUCANT]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
                                 echo ""
