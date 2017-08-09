@@ -1,13 +1,15 @@
 #!/bin/bash
-# fnugg v0.28
+# fnugg v0.30
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.28"
+FNUVER="0.30"
 FNUDIR="$HOME/.dokter/fnugg"
+FNUFLG=$1
+FNUNTC="2400"
 # Your API key for darksky.net
 # FNUSKY=""
 # Your API key for mapbox.com
@@ -78,6 +80,7 @@ if [ ! -e /usr/bin/curl ] && [ ! -e /usr/bin/jq ] && [ ! -e /usr/bin/fmt ]; then
         sudo dnf -y install curl jq
     else
         echo "You need to install curl, jq and fmt."
+        exit
     fi
 elif [ ! -e /usr/bin/curl ]; then
     FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
@@ -85,6 +88,7 @@ elif [ ! -e /usr/bin/curl ]; then
         sudo dnf -y install curl
     else
         echo "You need to install curl."
+        exit
     fi
 elif [ ! -e /usr/bin/jq ]; then
     FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
@@ -92,6 +96,7 @@ elif [ ! -e /usr/bin/jq ]; then
         sudo dnf -y install jq
     else
         echo "You need to install jq."
+        exit
     fi
 elif [ ! -e /usr/bin/fmt ]; then
     FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
@@ -99,6 +104,7 @@ elif [ ! -e /usr/bin/fmt ]; then
         sudo dnf -y install fmt
     else
         echo "You need to install fmt."
+        exit
     fi
 fi
 # -----------------------------------------------------------------------------------
@@ -185,6 +191,8 @@ while :; do
                     FNUTIZ=$(echo "$FNUSKYAPI" | jq -r '.timezone')
                     FNUCOL=$(tput cols)
                     # Current
+                    FNUDAT=$(echo "$FNUSKYAPI" | jq -r '.currently.time')
+                    FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M')
                     FNUTMP=$(echo "$FNUSKYAPI" | jq -r '.currently.temperature')
                     FNUTFL=$(echo "$FNUSKYAPI" | jq -r '.currently.apparentTemperature')
                     FNUUVI=$(echo "$FNUSKYAPI" | jq -r '.currently.uvIndex')
@@ -298,11 +306,21 @@ while :; do
                     FNUSNSTOM=$(echo "$FNUSKYAPI" | jq -r '.daily.data[1].sunsetTime')
                     FNUSNSTOM=$(TZ=$FNUTIZ date --date="@$FNUSNSTOM" +%H:%M)
                     FNUSUMWEK1=$(echo "$FNUSKYAPI" | jq -r '.daily.data[1].summary')
+                    # Notification
+                    if [ "$FNUFLG" = "notification" ]; then
+                        FNUNTC=$(expr $FNUNTC + $FNUREF)
+                        if [ "$FNUNTC" -eq "3000" ]; then
+                            FNUNOT=$(echo "$FNULOC" | cut -d , -f 1)
+                            notify-send "$FNUNOT" "$FNUTMP°C ($FNUTFL°C)"
+                            FNUNTC="0"
+                        fi
+                    fi
                     clear
                     echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
                     echo ""
                     echo ":: Location ::"
                     echo "$FNULOC" | fmt -w $FNUCOL -c
+                    echo "$FNUDAT"
                     echo ""
                     echo ":: Current ::"
                     echo "  Temperature: $FNUTMP°C"
