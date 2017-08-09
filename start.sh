@@ -320,7 +320,7 @@ while :; do
                     echo ""
                     echo ":: Location ::"
                     echo "$FNULOC" | fmt -w $FNUCOL -c
-                    echo "$FNUDAT"
+#                    echo "$FNUDAT"
                     echo ""
                     echo ":: Current ::"
                     echo "  Temperature: $FNUTMP°C"
