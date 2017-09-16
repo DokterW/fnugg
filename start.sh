@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.30
+# fnugg v0.31
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.30"
+FNUVER="0.31"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -77,7 +77,7 @@ FNUNIT="si"
 if [ ! -e /usr/bin/curl ] && [ ! -e /usr/bin/jq ] && [ ! -e /usr/bin/fmt ]; then
     FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
     if [ "$FNUOSD" = "Fedora" ]; then
-        sudo dnf -y install curl jq
+        sudo dnf -y install curl jq fmt
     else
         echo "You need to install curl, jq and fmt."
         exit
@@ -349,12 +349,12 @@ while :; do
                     echo -n "      Summary:"
                     echo "               $FNUSUMWEK1" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
                     echo ""
-                    echo "(Q)uit |    5-day   | (Any key)"
+                    echo "(Q)uit |    6-day   | (Any key)"
                     read -t $FNUREF -s -n1 -p "       | (f)orecast | to refresh: " FNUQUT
                     case "$FNUQUT" in
                         [fF])
                             FNUCANT=1
-                            until [ "$FNUCANT" -eq "6" ]; do
+                            until [ "$FNUCANT" -eq "7" ]; do
                                 FNUCANT=$(expr $FNUCANT + 1)
                                 FNUDAYWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].time")
                                 FNUDAYWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUDAYWEK[$FNUCANT]}" +%A)
@@ -390,6 +390,10 @@ while :; do
                                 elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "271" && "${FNUBRNWEK[$FNUCANT]}" -le "359" ]]; then
                                     FNUBRNWEK[$FNUCANT]="NW"
                                 fi
+                                FNUSNRWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].sunriseTime")
+                                FNUSNRWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUSNRWEK[$FNUCANT]}" +%H:%M)
+                                FNUSNSWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].sunsetTime")
+                                FNUSNSWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUSNSWEK[$FNUCANT]}" +%H:%M)
                                 FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
                             done
                             FNUCANT=1
@@ -399,12 +403,33 @@ while :; do
                             echo ":: Location ::"
                             echo "$FNULOC" | fmt -w $FNUCOL -c
                             echo ""
-                            until [ "$FNUCANT" -eq "6" ]; do
+                            until [ "$FNUCANT" -eq "4" ]; do
                                 FNUCANT=$(expr $FNUCANT + 1)
                                 echo ":: ${FNUDAYWEK[$FNUCANT]} ::"
                                 echo "  Temperature: ${FNUTMPW1K[$FNUCANT]}°C (${FNUTMPW2K[$FNUCANT]}°C)"
                                 echo "Precipitation: ${FNUPRPWEK[$FNUCANT]}% ${FNUPRTWEK[$FNUCANT]}"
                                 echo "         Wind: ${FNUWNDWEK[$FNUCANT]} m/s ${FNUBRNWEK[$FNUCANT]}"
+                                echo "      Sunrise: ${FNUSNRWEK[$FNUCANT]}"
+                                echo "       Sunset: ${FNUSNSWEK[$FNUCANT]}"
+                                echo -n "      Summary:"
+                                echo "               ${FNUSUMWEK[$FNUCANT]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
+                                echo ""
+                            done
+                            read -p "Press any key to continue... " -n1 -s
+                            clear
+                            echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+                            echo ""
+                            echo ":: Location ::"
+                            echo "$FNULOC" | fmt -w $FNUCOL -c
+                            echo ""
+                            until [ "$FNUCANT" -eq "7" ]; do
+                                FNUCANT=$(expr $FNUCANT + 1)
+                                echo ":: ${FNUDAYWEK[$FNUCANT]} ::"
+                                echo "  Temperature: ${FNUTMPW1K[$FNUCANT]}°C (${FNUTMPW2K[$FNUCANT]}°C)"
+                                echo "Precipitation: ${FNUPRPWEK[$FNUCANT]}% ${FNUPRTWEK[$FNUCANT]}"
+                                echo "         Wind: ${FNUWNDWEK[$FNUCANT]} m/s ${FNUBRNWEK[$FNUCANT]}"
+                                echo "      Sunrise: ${FNUSNRWEK[$FNUCANT]}"
+                                echo "       Sunset: ${FNUSNSWEK[$FNUCANT]}"
                                 echo -n "      Summary:"
                                 echo "               ${FNUSUMWEK[$FNUCANT]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
                                 echo ""

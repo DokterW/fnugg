@@ -15,6 +15,10 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 
 ### Changelog
 
+#### 2017-09-16
+* 6-day forecast instead of 5-day.
+* Added sunrise and sunset to forecast.
+
 #### 2017-08-09
 * Added notifications feature. Current temperature is notified every 30min.
 
