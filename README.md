@@ -4,7 +4,9 @@ Why check the weather in the terminal? Because reasons.
 
 Why fnugg? Snøfnugg is Norwegian for snowflake.
 
-'fnugg notification' will show current temperature notification every 30 min.
+~~'fnugg notification' will show current temperature notification every 30 min.~~
+'fnugg small' Default view, showing only current and then each day.
+'fnugg notification' The old standard view, with three different forecards par page.
 
 Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 (*You need API keys from both services to make fnugg functional.*)
@@ -12,8 +14,15 @@ Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 ### Roadmap
 
 * Add ability to save favourite locations.
+* Maybe re-enable notifications again
+* Add legacy function
 
 ### Changelog
+
+#### 2017-10-23
+* Disabled notifications.
+* Added two different views, large (the one that was standard) and small. Small is default now, to use large, type *fnugg large*.
+* Not thoroughly tested.
 
 #### 2017-09-16
 * 6-day forecast instead of 5-day.
