@@ -109,154 +109,161 @@ elif [ ! -e /usr/bin/fmt ]; then
 fi
 # Functions -------------------------------------------------------------------------
 small () {
+    FNUPAG="-1"
+    FNUQUT="1"
     while :; do
-        FNUSKYAPI=$(curl -s "https://api.darksky.net/forecast/$FNUSKY/$FNULAT,$FNULON?lang=$FNULAN&exclude=minutely,hourly,alerts,flags&units=$FNUNIT")
-        FNUTIZ=$(echo "$FNUSKYAPI" | jq -r '.timezone')
-        FNUCOL=$(tput cols)
-        # Current
-        FNUDAT=$(echo "$FNUSKYAPI" | jq -r '.currently.time')
-        FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M')
-        FNUTMP=$(echo "$FNUSKYAPI" | jq -r '.currently.temperature')
-        FNUTFL=$(echo "$FNUSKYAPI" | jq -r '.currently.apparentTemperature')
-        FNUUVI=$(echo "$FNUSKYAPI" | jq -r '.currently.uvIndex')
-        FNUHUM=$(echo "$FNUSKYAPI" | jq -r '.currently.humidity')
-        FNUHUM=$(echo "$FNUHUM*100" | bc | sed 's/\.00//')
-        FNUWND=$(echo "$FNUSKYAPI" | jq -r '.currently.windSpeed')
-        FNUBRN=$(echo "$FNUSKYAPI" | jq -r '.currently.windBearing')
-        FNUGST=$(echo "$FNUSKYAPI" | jq -r '.currently.windGust')
-        FNUSUM=$(echo "$FNUSKYAPI" | jq -r '.currently.summary')
-        if [[ "$FNUUVI" -ge "0" && "$FNUUVI" -le "2" ]]; then
-            FNUUVIRSK="Low"
-        elif [[ "$FNUUVI" -ge "3" && "$FNUUVI" -le "5" ]]; then
-            FNUUVIRSK="Moderate"
-        elif [[ "$FNUUVI" -ge "6" && "$FNUUVI" -le "7" ]]; then
-            FNUUVIRSK="High"
-        elif [[ "$FNUUVI" -ge "8" && "$FNUUVI" -le "10" ]]; then
-            FNUUVIRSK="Very high"
-        elif [[ "$FNUUVI" -ge "11" ]]; then
-            FNUUVIRSK="Extreme"
+        if [[ "$FNUQUT" = "1" ]]; then
+            FNUSKYAPI=$(curl -s "https://api.darksky.net/forecast/$FNUSKY/$FNULAT,$FNULON?lang=$FNULAN&exclude=minutely,hourly,alerts,flags&units=$FNUNIT")
+            FNUTIZ=$(echo "$FNUSKYAPI" | jq -r '.timezone')
+            FNUCOL=$(tput cols)
+            # Current
+            FNUDAT=$(echo "$FNUSKYAPI" | jq -r '.currently.time')
+            FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M')
+            FNUTMP=$(echo "$FNUSKYAPI" | jq -r '.currently.temperature')
+            FNUTFL=$(echo "$FNUSKYAPI" | jq -r '.currently.apparentTemperature')
+            FNUUVI=$(echo "$FNUSKYAPI" | jq -r '.currently.uvIndex')
+            FNUHUM=$(echo "$FNUSKYAPI" | jq -r '.currently.humidity')
+            FNUHUM=$(echo "$FNUHUM*100" | bc | sed 's/\.00//')
+            FNUWND=$(echo "$FNUSKYAPI" | jq -r '.currently.windSpeed')
+            FNUBRN=$(echo "$FNUSKYAPI" | jq -r '.currently.windBearing')
+            FNUGST=$(echo "$FNUSKYAPI" | jq -r '.currently.windGust')
+            FNUSUM=$(echo "$FNUSKYAPI" | jq -r '.currently.summary')
+            if [[ "$FNUUVI" -ge "0" && "$FNUUVI" -le "2" ]]; then
+                FNUUVIRSK="Low"
+            elif [[ "$FNUUVI" -ge "3" && "$FNUUVI" -le "5" ]]; then
+                FNUUVIRSK="Moderate"
+            elif [[ "$FNUUVI" -ge "6" && "$FNUUVI" -le "7" ]]; then
+                FNUUVIRSK="High"
+            elif [[ "$FNUUVI" -ge "8" && "$FNUUVI" -le "10" ]]; then
+                FNUUVIRSK="Very high"
+            elif [[ "$FNUUVI" -ge "11" ]]; then
+                FNUUVIRSK="Extreme"
+            fi
+            if [[ "$FNUBRN" -eq "null" ]]; then
+                FNUBRN=""
+            elif [[ "$FNUBRN" -eq "0" ]]; then
+                FNUBRN="N"
+            elif [[ "$FNUBRN" -ge "1" && "$FNUBRN" -le "89" ]]; then
+                FNUBRN="NE"
+            elif [[ "$FNUBRN" -eq "90" ]]; then
+                FNUBRN="E"
+            elif [[ "$FNUBRN" -ge "91" && "$FNUBRN" -le "179" ]]; then
+                FNUBRN="SE"
+            elif [[ "$FNUBRN" -eq "180" ]]; then
+                FNUBRN="S"
+            elif [[ "$FNUBRN" -ge "181" && "$FNUBRN" -le "269" ]]; then
+                FNUBRN="SW"
+            elif [[ "$FNUBRN" -eq "270" ]]; then
+                FNUBRN="W"
+            elif [[ "$FNUBRN" -ge "271" && "$FNUBRN" -le "359" ]]; then
+                FNUBRN="NW"
+            fi
+            # Forecast
+            FNUCANT=0
+            until [ "$FNUCANT" -eq "7" ]; do
+                FNUDAYWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].time")
+                FNUDAYWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUDAYWEK[$FNUCANT]}" +%A)
+                FNUDAYWEK[$FNUCANT]=$(echo "${FNUDAYWEK[$FNUCANT]^}")
+                FNUTMPW1K[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].temperatureMax")
+                FNUTMPW2K[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].temperatureMin")
+                FNUPRPWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipProbability")
+                FNUPRPWEK[$FNUCANT]=$(echo "${FNUPRPWEK[$FNUCANT]}*100" | bc | sed 's/\.00//')
+                FNUPRTWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipType")
+                if [ "${FNUPRTWEK[$FNUCANT]}" = "null" ]; then
+                    FNUPRTWEK[$FNUCANT]=""
+                else
+                    FNUPRTWEK[$FNUCANT]=$(echo "chance of ${FNUPRTWEK[$FNUCANT]}")
+                fi
+                FNUWNDWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].windSpeed")
+                FNUBRNWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].windBearing")
+                if [[ "${FNUBRNWEK[$FNUCANT]}" -eq "null" ]]; then
+                    FNUBRNWEK[$FNUCANT]=""
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "0" ]]; then
+                    FNUBRNWEK[$FNUCANT]="N"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "1" && "${FNUBRNWEK[$FNUCANT]}" -le "89" ]]; then
+                    FNUBRNWEK[$FNUCANT]="NE"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "90" ]]; then
+                    FNUBRNWEK[$FNUCANT]="E"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "91" && "${FNUBRNWEK[$FNUCANT]}" -le "179" ]]; then
+                    FNUBRNWEK[$FNUCANT]="SE"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "180" ]]; then
+                    FNUBRNWEK[$FNUCANT]="S"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "181" && "${FNUBRNWEK[$FNUCANT]}" -le "269" ]]; then
+                    FNUBRNWEK[$FNUCANT]="SW"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "270" ]]; then
+                    FNUBRNWEK[$FNUCANT]="W"
+                elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "271" && "${FNUBRNWEK[$FNUCANT]}" -le "359" ]]; then
+                    FNUBRNWEK[$FNUCANT]="NW"
+                fi
+                FNUSNRWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].sunriseTime")
+                FNUSNRWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUSNRWEK[$FNUCANT]}" +%H:%M)
+                FNUSNSWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].sunsetTime")
+                FNUSNSWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUSNSWEK[$FNUCANT]}" +%H:%M)
+                FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
+                FNUCANT=$(expr $FNUCANT + 1)
+            done
+            FNUCANT=0
         fi
-        if [[ "$FNUBRN" -eq "null" ]]; then
-            FNUBRN=""
-        elif [[ "$FNUBRN" -eq "0" ]]; then
-            FNUBRN="N"
-        elif [[ "$FNUBRN" -ge "1" && "$FNUBRN" -le "89" ]]; then
-            FNUBRN="NE"
-        elif [[ "$FNUBRN" -eq "90" ]]; then
-            FNUBRN="E"
-        elif [[ "$FNUBRN" -ge "91" && "$FNUBRN" -le "179" ]]; then
-            FNUBRN="SE"
-        elif [[ "$FNUBRN" -eq "180" ]]; then
-            FNUBRN="S"
-        elif [[ "$FNUBRN" -ge "181" && "$FNUBRN" -le "269" ]]; then
-            FNUBRN="SW"
-        elif [[ "$FNUBRN" -eq "270" ]]; then
-            FNUBRN="W"
-        elif [[ "$FNUBRN" -ge "271" && "$FNUBRN" -le "359" ]]; then
-            FNUBRN="NW"
+        clear
+        echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+        echo ""
+        echo ":: Location ::"
+        echo "$FNULOC" | fmt -w $FNUCOL -c
+        echo ""
+        if [[ "$FNUPAG" = "-1" ]]; then
+            FNUQUT="1"
+            echo ":: Current ::"
+            echo "  Temperature: $FNUTMP°C"
+            echo "   Feels like: $FNUTFL°C"
+            echo "     UV Index: $FNUUVI ($FNUUVIRSK)"
+            echo "     Humidity: $FNUHUM%"
+            echo "         Wind: $FNUWND m/s ($FNUGST m/s) $FNUBRN"
+            echo -n "      Summary:"
+            echo "               $FNUSUM" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
+        elif [[ "$FNUPAG" != "-1" ]]; then
+            FNUQUT="1"
+            echo ":: ${FNUDAYWEK[$FNUPAG]} ::"
+            echo "  Temperature: ${FNUTMPW1K[$FNUPAG]}°C (${FNUTMPW2K[$FNUPAG]}°C)"
+            echo "Precipitation: ${FNUPRPWEK[$FNUPAG]}% ${FNUPRTWEK[$FNUPAG]}"
+            echo "         Wind: ${FNUWNDWEK[$FNUPAG]} m/s ${FNUBRNWEK[$FNUPAG]}"
+            echo "      Sunrise: ${FNUSNRWEK[$FNUPAG]}"
+            echo "       Sunset: ${FNUSNSWEK[$FNUPAG]}"
+            echo -n "      Summary:"
+            echo "               ${FNUSUMWEK[$FNUPAG]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
         fi
-        # Forecast
-        FNUCANT=0
-        until [ "$FNUCANT" -eq "7" ]; do
-            FNUDAYWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].time")
-            FNUDAYWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUDAYWEK[$FNUCANT]}" +%A)
-            FNUDAYWEK[$FNUCANT]=$(echo "${FNUDAYWEK[$FNUCANT]^}")
-            FNUTMPW1K[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].temperatureMax")
-            FNUTMPW2K[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].temperatureMin")
-            FNUPRPWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipProbability")
-            FNUPRPWEK[$FNUCANT]=$(echo "${FNUPRPWEK[$FNUCANT]}*100" | bc | sed 's/\.00//')
-            FNUPRTWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].precipType")
-            if [ "${FNUPRTWEK[$FNUCANT]}" = "null" ]; then
-                FNUPRTWEK[$FNUCANT]=""
-            else
-                FNUPRTWEK[$FNUCANT]=$(echo "chance of ${FNUPRTWEK[$FNUCANT]}")
-            fi
-            FNUWNDWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].windSpeed")
-            FNUBRNWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].windBearing")
-            if [[ "${FNUBRNWEK[$FNUCANT]}" -eq "null" ]]; then
-                FNUBRNWEK[$FNUCANT]=""
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "0" ]]; then
-                FNUBRNWEK[$FNUCANT]="N"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "1" && "${FNUBRNWEK[$FNUCANT]}" -le "89" ]]; then
-                FNUBRNWEK[$FNUCANT]="NE"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "90" ]]; then
-                FNUBRNWEK[$FNUCANT]="E"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "91" && "${FNUBRNWEK[$FNUCANT]}" -le "179" ]]; then
-                FNUBRNWEK[$FNUCANT]="SE"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "180" ]]; then
-                FNUBRNWEK[$FNUCANT]="S"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "181" && "${FNUBRNWEK[$FNUCANT]}" -le "269" ]]; then
-                FNUBRNWEK[$FNUCANT]="SW"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -eq "270" ]]; then
-                FNUBRNWEK[$FNUCANT]="W"
-            elif [[ "${FNUBRNWEK[$FNUCANT]}" -ge "271" && "${FNUBRNWEK[$FNUCANT]}" -le "359" ]]; then
-                FNUBRNWEK[$FNUCANT]="NW"
-            fi
-            FNUSNRWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].sunriseTime")
-            FNUSNRWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUSNRWEK[$FNUCANT]}" +%H:%M)
-            FNUSNSWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].sunsetTime")
-            FNUSNSWEK[$FNUCANT]=$(TZ=$FNUTIZ date --date="@${FNUSNSWEK[$FNUCANT]}" +%H:%M)
-            FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
-            FNUCANT=$(expr $FNUCANT + 1)
-        done
-        FNUCANT=1
-        FNUPAG="-1"
-        while :; do
-            clear
-            echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
-            echo ""
-            echo ":: Location ::"
-            echo "$FNULOC" | fmt -w $FNUCOL -c
-            #echo "$FNUDAT"
-            echo ""
-            if [[ "$FNUPAG" = "-1" ]]; then
-                echo ":: Current ::"
-                echo "  Temperature: $FNUTMP°C"
-                echo "   Feels like: $FNUTFL°C"
-                echo "     UV Index: $FNUUVI ($FNUUVIRSK)"
-                echo "     Humidity: $FNUHUM%"
-                echo "         Wind: $FNUWND m/s ($FNUGST m/s) $FNUBRN"
-                echo -n "      Summary:"
-                echo "               $FNUSUM" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
-            elif [[ "$FNUPAG" != "-1" ]]; then
-                echo ":: ${FNUDAYWEK[$FNUPAG]} ::"
-                echo "  Temperature: ${FNUTMPW1K[$FNUPAG]}°C (${FNUTMPW2K[$FNUPAG]}°C)"
-                echo "Precipitation: ${FNUPRPWEK[$FNUPAG]}% ${FNUPRTWEK[$FNUPAG]}"
-                echo "         Wind: ${FNUWNDWEK[$FNUPAG]} m/s ${FNUBRNWEK[$FNUPAG]}"
-                echo "      Sunrise: ${FNUSNRWEK[$FNUPAG]}"
-                echo "       Sunset: ${FNUSNSWEK[$FNUPAG]}"
-                echo -n "      Summary:"
-                echo "               ${FNUSUMWEK[$FNUPAG]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
-            fi
-            echo ""
-            read -t $FNUREF -s -n1 -p "(N)ext / (P)revious / (R)efresh / (Q)uit " FNUQUT
-            case "$FNUQUT" in
-                [nN])
-                    FNUPAG=$(expr $FNUPAG + 1)
-                    if [[ "$FNUPAG" -gt "6" ]]; then
-                        FNUPAG="6"
-                    fi
-                ;;
-                [pP])
-                    FNUPAG=$(expr $FNUPAG - 1)
-                    if [[ "$FNUPAG" -lt "-1" ]]; then
-                        FNUPAG="-1"
-                    fi
-                ;;
-                [qQ])
-                    break
-                    FNUQIT="1"
-                ;;
-                *)
-                    continue
-                ;;
-            esac
-            if [[ "$FNUQIT" = "1" ]]; then
-                FNUQIT="0"
+        echo ""
+        read -t $FNUREF -s -n1 -p "(N)ext / (P)revious / (R)efresh / (Q)uit " FNUQUT
+        case "$FNUQUT" in
+            [nN])
+                FNUPAG=$(expr $FNUPAG + 1)
+                if [[ "$FNUPAG" -gt "6" ]]; then
+                    FNUPAG="6"
+                fi
+                FNUQUT="0"
+            ;;
+            [pP])
+                FNUPAG=$(expr $FNUPAG - 1)
+                if [[ "$FNUPAG" -le "-1" ]]; then
+                    FNUPAG="-1"
+                    FNUQUT="1"
+                else
+                    FNUQUT="0"
+                fi
+            ;;
+            [qQ])
                 break
-            fi
-        done
-        break
+                FNUQIT="1"
+                FNUQUT="0"
+            ;;
+            [rR])
+                FNUQUT="1"
+                continue
+            ;;
+        esac
+        if [[ "$FNUQIT" = "1" ]]; then
+            FNUQIT="0"
+            break
+        fi
     done
 }
 large () {
