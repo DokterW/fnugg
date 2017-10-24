@@ -11,13 +11,25 @@ Why fnugg? Snøfnugg is Norwegian for snowflake.
 Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 (*You need API keys from both services to make fnugg functional.*)
 
+## How to install
+
+Install [doghum](https://github.com/DokterW/doghum)
+
+`doghum install fupr`
+
 ### Roadmap
 
 * Add ability to save favourite locations.
-* Maybe re-enable notifications again
-* Add legacy function
+* Maybe re-enable notifications again.
+* Add legacy function.
+* Tweak code before v1.0 is released.
 
 ### Changelog
+
+#### 2017-10-24
+* Show time and date when weather data was fetched.
+* Page indicator.
+* Refresh fix (if it refreshed every 10 min it only reloaded the old data).
 
 #### 2017-10-23
 * Disabled notifications.

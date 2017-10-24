@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.32
+# fnugg v0.33
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.32"
+FNUVER="0.33"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -110,6 +110,7 @@ fi
 # Functions -------------------------------------------------------------------------
 small () {
     FNUPAG="-1"
+    FNUPAGIND="1"
     FNUQUT="1"
     while :; do
         if [[ "$FNUQUT" = "1" ]]; then
@@ -118,7 +119,7 @@ small () {
             FNUCOL=$(tput cols)
             # Current
             FNUDAT=$(echo "$FNUSKYAPI" | jq -r '.currently.time')
-            FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M')
+            FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M:%S')
             FNUTMP=$(echo "$FNUSKYAPI" | jq -r '.currently.temperature')
             FNUTFL=$(echo "$FNUSKYAPI" | jq -r '.currently.apparentTemperature')
             FNUUVI=$(echo "$FNUSKYAPI" | jq -r '.currently.uvIndex')
@@ -206,6 +207,7 @@ small () {
         fi
         clear
         echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+        echo "[data fetched $FNUDAT]"
         echo ""
         echo ":: Location ::"
         echo "$FNULOC" | fmt -w $FNUCOL -c
@@ -232,19 +234,29 @@ small () {
             echo "               ${FNUSUMWEK[$FNUPAG]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
         fi
         echo ""
-        read -t $FNUREF -s -n1 -p "(N)ext / (P)revious / (R)efresh / (Q)uit " FNUQUT
+        echo "(H)ome / (N)ext / (P)revious"
+        read -t $FNUREF -s -n1 -p "(R)efresh / (Q)uit [Page $FNUPAGIND/8] " FNUQUT
         case "$FNUQUT" in
+            [hH])
+                FNUQUT="1"
+                FNUPAGIND="1"
+                FNUPAG="-1"
+            ;;
             [nN])
                 FNUPAG=$(expr $FNUPAG + 1)
-                if [[ "$FNUPAG" -gt "6" ]]; then
+                FNUPAGIND=$(expr $FNUPAGIND + 1)
+                if [[ "$FNUPAG" -gt "6" ]] && [[ "$FNUPAGIND" -gt "8" ]]; then
                     FNUPAG="6"
+                    FNUPAGIND="8"
                 fi
                 FNUQUT="0"
             ;;
             [pP])
                 FNUPAG=$(expr $FNUPAG - 1)
-                if [[ "$FNUPAG" -le "-1" ]]; then
+                FNUPAGIND=$(expr $FNUPAGIND - 1)
+                if [[ "$FNUPAG" -le "-1" ]] && [[ "$FNUPAGIND" -le "1" ]]; then
                     FNUPAG="-1"
+                    FNUPAGIND="1"
                     FNUQUT="1"
                 else
                     FNUQUT="0"
@@ -263,6 +275,8 @@ small () {
         if [[ "$FNUQIT" = "1" ]]; then
             FNUQIT="0"
             break
+        elif [[ -z "$FNUQUT" ]]; then
+            FNUQIT="1"
         fi
     done
 }
@@ -273,7 +287,7 @@ large () {
         FNUCOL=$(tput cols)
         # Current
         FNUDAT=$(echo "$FNUSKYAPI" | jq -r '.currently.time')
-        FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M')
+        FNUDAT=$(TZ=$FNUTIZ date --date="@$FNUDAT" '+%Y-%m-%d %H:%M:%S')
         FNUTMP=$(echo "$FNUSKYAPI" | jq -r '.currently.temperature')
         FNUTFL=$(echo "$FNUSKYAPI" | jq -r '.currently.apparentTemperature')
         FNUUVI=$(echo "$FNUSKYAPI" | jq -r '.currently.uvIndex')
@@ -398,10 +412,10 @@ large () {
         #fi
         clear
         echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+        echo "[data fetched $FNUDAT]"
         echo ""
         echo ":: Location ::"
         echo "$FNULOC" | fmt -w $FNUCOL -c
-        #echo "$FNUDAT"
         echo ""
         echo ":: Current ::"
         echo "  Temperature: $FNUTMP°C"
