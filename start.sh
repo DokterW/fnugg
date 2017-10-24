@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.33
+# fnugg v0.34
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.33"
+FNUVER="0.34"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -207,7 +207,7 @@ small () {
         fi
         clear
         echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
-        echo "[data fetched $FNUDAT]"
+        echo "[$FNUDAT]"
         echo ""
         echo ":: Location ::"
         echo "$FNULOC" | fmt -w $FNUCOL -c
@@ -412,7 +412,7 @@ large () {
         #fi
         clear
         echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
-        echo "[data fetched $FNUDAT]"
+        echo "[$FNUDAT]"
         echo ""
         echo ":: Location ::"
         echo "$FNULOC" | fmt -w $FNUCOL -c
