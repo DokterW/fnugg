@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.35
+# fnugg v0.36
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.35"
+FNUVER="0.36"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -537,6 +537,17 @@ large () {
         esac
     done
 }
+fnuerror () {
+    FNUERR=$(cat /dev/urandom | tr -dc '1-2' | fold -w 1 | head -n 1)
+    case "$FNUERR" in
+        1)
+            echo "Butterfingers!"
+        ;;
+        2)
+            echo "Sausage Fingers!"
+        ;;
+    esac
+}
 # -----------------------------------------------------------------------------------
 while :; do
 #    clear
@@ -557,8 +568,8 @@ while :; do
         echo ""
         echo "Search for city or (q)uit:"
         read -p "> " FNUSRC
-        # If the city name has a space in it, add underscore. If the city name has ÅÄÖ or ÆØÅ in it, change it to OAA.
-        FNUSRC=$(echo $FNUSRC | sed -r 's/\s/_/' | sed -r 's/[æÆ]/a/' | sed -r 's/[øØ]/o/' | sed -r 's/[åÅ]/a/' | sed -r 's/[äÄ]/a/' | sed -r 's/[öÖ]/o/')
+        # If the city name has a space in it, add underscore. If the city name has ÅÄÖ or ÆØÅ in it, change it to OEAEA.
+        FNUSRC=$(echo $FNUSRC | sed -r 's/\s/_/' | sed -r 's/[æÆ]/ae/' | sed -r 's/[øØ]/oe/' | sed -r 's/[åÅ]/a/' | sed -r 's/[äÄ]/ae/' | sed -r 's/[öÖ]/oe/')
         # Semi-secret way to quit.
         if [ "$FNUSRC" = "q" ] || [ "$FNUSRC" = "Q" ]; then
             clear
@@ -567,7 +578,7 @@ while :; do
         # If nothing entered, try again.
         if [ -z "$FNUSRC" ]; then
             clear
-            echo "Butterfingers!"
+            fnuerror
             sleep 3s
         else
             break
@@ -599,7 +610,7 @@ while :; do
             FNUKEY=$(expr $FNUKEY - 1)
             if [ "$FNUKEY" -gt "$FNUCNT" ] || [ "$FNUKEY" -lt "0" ] || [ -z "$FNUKEY" ]; then
                 clear
-                echo "Butterfingers!"
+                fnuerror
                 sleep 3s
             else
                 case $FNUKEY in
@@ -626,7 +637,7 @@ while :; do
         fi
     else
         clear
-        echo "Butterfingers!"
+        fnuerror
         sleep 3s
     fi
 done

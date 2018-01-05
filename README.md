@@ -6,7 +6,7 @@ Why fnugg? Snøfnugg is Norwegian for snowflake.
 
 ~~'fnugg notification' will show current temperature notification every 30 min.~~
 'fnugg small' Default view, showing only current and then each day.
-'fnugg notification' The old standard view, with three different forecards par page.
+'fnugg notification' The old standard view, with three different forecast par page.
 
 Powered by [Dark Sky](http://darksky.net) & [Mapbox](https://www.mapbox.com).
 (*You need API keys from both services to make fnugg functional.*)
@@ -25,6 +25,10 @@ Install [doghum](https://github.com/DokterW/doghum)
 * Tweak code before v1.0 is released.
 
 ### Changelog
+
+#### 2018-01-05
+* Added an extra error message. By random it will either say Butterfingers! or Sausage Fingers! (requested by cleo)
+* Fixed when changing Ö/Ø to OE instead of O, and Ä/Æ to AE instead of A. This was because some city names do not accept only A, but want AE.
 
 #### 2017-10-24
 * Show time and date when weather data was fetched.
