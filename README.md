@@ -26,6 +26,9 @@ Install [doghum](https://github.com/DokterW/doghum)
 
 ### Changelog
 
+#### 2018-03-27
+* Added GeoIP feature.
+
 #### 2018-01-05
 * Added an extra error message. By random it will either say Butterfingers! or Sausage Fingers! (requested by cleo)
 * Fixed when changing Ö/Ø to OE instead of O, and Ä/Æ to AE instead of A. This was because some city names do not accept only A, but want AE.

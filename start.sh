@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.37
+# fnugg v0.38
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.37"
+FNUVER="0.38"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -75,9 +75,12 @@ FNULAN="en"
 FNUNIT="si"
 # Install dependencies --------------------------------------------------------------
 if [ ! -e /usr/bin/curl ] && [ ! -e /usr/bin/jq ] && [ ! -e /usr/bin/fmt ]; then
-    FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
-    if [ "$FNUOSD" = "Fedora" ]; then
+#    FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
+    FNUOSD=$(cat /etc/os-release | grep -oE '^ID=' | sed 's/ID=//')
+    if [[ "$FNUOSD" = "fedora" ]]; then
         sudo dnf -y install curl jq fmt
+    elif [[ "$FNUOSD" = "ubuntu" ]]; then
+        sudo apt install curl jq fmt
     else
         echo "You need to install curl, jq and fmt."
         exit
@@ -551,96 +554,121 @@ fnuerror () {
 }
 # -----------------------------------------------------------------------------------
 while :; do
-#    clear
-#    echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
-#    echo ""
-#    echo "Press any key to check the weather"
-#    echo -n "Q. Quit "
-#    read -p "" -s -n1 FNUKEY
-#    if [ "$FNUKEY" = "q" ] || [ "$FNUKEY" = "Q" ]; then
-#        clear
-#        break
-#    else
-#        FNUKEY=""
-#    fi
-    while :; do
-        clear
-        echo "$FNUNAM - v$FNUVER"
-        echo "powered by darksky & mapbox"
-        echo ""
-        echo "Search for city or (q)uit:"
-        read -p "> " FNUSRC
-        # If the city name has a space in it, add underscore. If the city name has ÅÄÖ or ÆØÅ in it, change it to OEAEA.
-        FNUSRC=$(echo $FNUSRC | sed -r 's/\s/_/' | sed -r 's/[æÆ]/ae/' | sed -r 's/[øØ]/oe/' | sed -r 's/[åÅ]/a/' | sed -r 's/[äÄ]/ae/' | sed -r 's/[öÖ]/oe/')
-        # Semi-secret way to quit.
-        if [ "$FNUSRC" = "q" ] || [ "$FNUSRC" = "Q" ]; then
+    clear
+    echo "$FNUNAM - v$FNUVER"
+    echo "powered by darksky & mapbox"
+    echo ""
+    echo "1. Forecast based on GeoIP"
+    echo "2. Search for city"
+    echo ""
+    echo -n "Q. Quit "
+    read -p "" -s -n1 FNUKEY
+    case "$FNUKEY" in
+        1)
+            FNUIP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+            FNUIPAPI=$(curl -s "https://ipapi.co/$FNUIP/json/")
+            FNULOC=$(echo "$FNUIPAPI" | jq -r '.city')
+            FNULON=$(echo "$FNUIPAPI" | jq -r '.longitude')
+            FNULAT=$(echo "$FNUIPAPI" | jq -r '.latitude')
+            FNUKEY="fnugg"
+        ;;
+        2)
+            FNUKEY="search"
+        ;;
+        [qQ])
             clear
-            exit
-        fi
-        # If nothing entered, try again.
-        if [ -z "$FNUSRC" ]; then
-            clear
-            fnuerror
-            sleep 3s
-        else
             break
-        fi
-    done
-    # Find coordinated
-    FNUMAPAPI=$(curl -s "https://api.mapbox.com/geocoding/v5/mapbox.places/$FNUSRC.json?access_token=$FNUMAP&types=place")
-    FNULST=$(echo "$FNUMAPAPI" | jq -r '.features[].place_name' | nl -w1 -s'. ')
-    FNUCNT=$(echo "$FNULST" | wc -l)
-    if [ -n "$FNULST" ]; then
-        if [ "$FNUCNT" -gt "1" ]; then
+        ;;
+        *)
+            continue
+        ;;
+    esac
+    if [[ "$FNUKEY" = "search" ]]; then
+        while :; do
             clear
             echo "$FNUNAM - v$FNUVER"
             echo "powered by darksky & mapbox"
             echo ""
-            echo "$FNULST"
-            echo ""
-            echo "B. Back to search  |  Q. Quit"
-            echo ""
-            read -p "Enter option: " -s -n1 FNUKEY
-        else
-            FNUKEY="1"
-        fi
-        if [ "$FNUKEY" = "q" ] || [ "$FNUKEY" = "Q" ]; then
-            clear
-            break
-        elif [ "$FNUKEY" = "b" ] || [ "$FNUKEY" = "B" ]; then
-            continue
-        else
-            FNUKEY=$(expr $FNUKEY - 1)
-            if [ "$FNUKEY" -gt "$FNUCNT" ] || [ "$FNUKEY" -lt "0" ] || [ -z "$FNUKEY" ]; then
+            echo "Search for city or (q)uit:"
+            read -p "> " FNUSRC
+            # If the city name has a space in it, add underscore. If the city name has ÅÄÖ or ÆØÅ in it, change it to OEAEA.
+            FNUSRC=$(echo $FNUSRC | sed -r 's/\s/_/' | sed -r 's/[æÆ]/ae/' | sed -r 's/[øØ]/oe/' | sed -r 's/[åÅ]/a/' | sed -r 's/[äÄ]/ae/' | sed -r 's/[öÖ]/oe/')
+            # Semi-secret way to quit.
+            if [ "$FNUSRC" = "q" ] || [ "$FNUSRC" = "Q" ]; then
+                clear
+                exit
+            fi
+            # If nothing entered, try again.
+            if [ -z "$FNUSRC" ]; then
                 clear
                 fnuerror
                 sleep 3s
             else
-                case $FNUKEY in
-                    [0-9])
-                        # Location
-                        FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name")
-                        # Latitude
-                        FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[1]")
-                        # Longitude
-                        FNULON=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
-                    ;;
-                    [qQ])
-                        clear
-                        break
-                    ;;
-                esac
-                # Functions
-                if [[ "$FNUFLG" = "small" ]] || [[ -z "$FNUFLG" ]]; then
-                    small
-                elif [[ "$FNUFLG" = "large" ]]; then
-                    large
+                # Continue
+                break
+            fi
+        done
+        # Find coordinated
+        FNUMAPAPI=$(curl -s "https://api.mapbox.com/geocoding/v5/mapbox.places/$FNUSRC.json?access_token=$FNUMAP&types=place")
+        FNULST=$(echo "$FNUMAPAPI" | jq -r '.features[].place_name' | nl -w1 -s'. ')
+        FNUCNT=$(echo "$FNULST" | wc -l)
+        if [ -n "$FNULST" ]; then
+            if [ "$FNUCNT" -gt "1" ]; then
+                clear
+                echo "$FNUNAM - v$FNUVER"
+                echo "powered by darksky & mapbox"
+                echo ""
+                echo "$FNULST"
+                echo ""
+                echo "B. Back to search  |  Q. Quit"
+                echo ""
+                read -p "Enter option: " -s -n1 FNUKEY
+            else
+                FNUKEY="1"
+            fi
+            if [ "$FNUKEY" = "q" ] || [ "$FNUKEY" = "Q" ]; then
+                clear
+                break
+            elif [ "$FNUKEY" = "b" ] || [ "$FNUKEY" = "B" ]; then
+                continue
+            else
+                FNUKEY=$(expr $FNUKEY - 1)
+                if [ "$FNUKEY" -gt "$FNUCNT" ] || [ "$FNUKEY" -lt "0" ] || [ -z "$FNUKEY" ]; then
+                    clear
+                    fnuerror
+                    sleep 3s
+                else
+                    if [[ "$FNUKEY" -ge "1" ]] || [[ "$FNUKEY" -le "9" ]]; then
+                        case $FNUKEY in
+                            [0-9])
+                                # Location
+                                FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name")
+                                # Latitude
+                                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[1]")
+                                # Longitude
+                                FNULON=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
+                                FNUKEY="fnugg"
+                            ;;
+                            [qQ])
+                                clear
+                                exit
+                            ;;
+                        esac
+                    fi
                 fi
             fi
+        else
+            clear
+            fnuerror
+            sleep 3s
         fi
-    else
-        clear
-        fnuerror
-        sleep 3s
+    fi
+    if [[ "$FNUKEY" = "fnugg" ]]; then
+        # Functions
+        if [[ "$FNUFLG" = "small" ]] || [[ -z "$FNUFLG" ]]; then
+            small
+        elif [[ "$FNUFLG" = "large" ]]; then
+            large
+        fi
     fi
 done
