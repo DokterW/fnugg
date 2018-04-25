@@ -26,6 +26,9 @@ Install [doghum](https://github.com/DokterW/doghum)
 
 ### Changelog
 
+#### 2018-04-25
+* Minor tweaks
+
 #### 2018-03-27
 * Added GeoIP feature.
 

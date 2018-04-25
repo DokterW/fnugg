@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.38
+# fnugg v0.39
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.38"
+FNUVER="0.39"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -75,7 +75,7 @@ FNULAN="en"
 FNUNIT="si"
 # Install dependencies --------------------------------------------------------------
 if [ ! -e /usr/bin/curl ] && [ ! -e /usr/bin/jq ] && [ ! -e /usr/bin/fmt ]; then
-#    FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
+    #FNUOSD=$(cat /etc/system-release | grep -oE '^[A-Z][a-z]+\s' | sed '1s/\s//')
     FNUOSD=$(cat /etc/os-release | grep -oE '^ID=' | sed 's/ID=//')
     if [[ "$FNUOSD" = "fedora" ]]; then
         sudo dnf -y install curl jq fmt
@@ -209,12 +209,9 @@ small () {
             FNUCANT=0
         fi
         clear
-        echo "$FNUNAM - v$FNUVER"
-        echo "powered by darksky & mapbox"
-        echo "[$FNUDAT]"
-        echo ""
         echo ":: Location ::"
         echo "$FNULOC" | fmt -w $FNUCOL -c
+        echo "[$FNUDAT]"
         echo ""
         if [[ "$FNUPAG" = "-1" ]]; then
             FNUQUT="1"
@@ -238,10 +235,20 @@ small () {
             echo "               ${FNUSUMWEK[$FNUPAG]}" | fmt -w $FNUCOL -c | sed -r '1s/^\s{15}/ /'
         fi
         echo ""
-        echo "(H)ome / (N)ext / (P)revious"
+        echo "(H)ome / (A)bout / (N)ext / (P)revious"
         read -t $FNUREF -s -n1 -p "(R)efresh / (Q)uit [Page $FNUPAGIND/8] " FNUQUT
         case "$FNUQUT" in
             [hH])
+                FNUQUT="1"
+                FNUPAGIND="1"
+                FNUPAG="-1"
+            ;;
+            [aA])
+                clear
+                echo "$FNUNAM - v$FNUVER"
+                echo "powered by ipapi, darksky & mapbox"
+                echo ""
+                read -s -n1 -p "Press any key to continue... "
                 FNUQUT="1"
                 FNUPAGIND="1"
                 FNUPAG="-1"
@@ -567,7 +574,11 @@ while :; do
         1)
             FNUIP=$(dig +short myip.opendns.com @resolver1.opendns.com)
             FNUIPAPI=$(curl -s "https://ipapi.co/$FNUIP/json/")
-            FNULOC=$(echo "$FNUIPAPI" | jq -r '.city')
+            FNUCTY=$(echo "$FNUIPAPI" | jq -r '.city')
+            #FNUCTY=$(echo $FNUCTY | sed -r 's/\s/_/' | sed -r 's/ae/æ/' | sed -r 's/oe/ø/' | sed -r 's/[åÅ]/a/' | sed -r 's/ae/ä/' | sed -r 's/oe/ö/')
+            FNUREG=$(echo "$FNUIPAPI" | jq -r '.region')
+            FNULND=$(echo "$FNUIPAPI" | jq -r '.country_name')
+            FNULOC=$(echo "$FNUCTY, $FNUREG, $FNULND")
             FNULON=$(echo "$FNUIPAPI" | jq -r '.longitude')
             FNULAT=$(echo "$FNUIPAPI" | jq -r '.latitude')
             FNUKEY="fnugg"
@@ -644,7 +655,7 @@ while :; do
                                 # Location
                                 FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name")
                                 # Latitude
-                                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[1]")
+                                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
                                 # Longitude
                                 FNULON=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
                                 FNUKEY="fnugg"
