@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.39
+# fnugg v0.40
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.39"
+FNUVER="0.40"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -245,7 +245,7 @@ small () {
             ;;
             [aA])
                 clear
-                echo "$FNUNAM - v$FNUVER"
+                echo "$FNUnam v$FNUVER"
                 echo "powered by ipapi, darksky & mapbox"
                 echo ""
                 read -s -n1 -p "Press any key to continue... "
@@ -418,7 +418,7 @@ large () {
         #    fi
         #fi
         clear
-        echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+        echo "$FNUnam v$FNUVER :: powered by darksky & mapbox"
         echo "[$FNUDAT]"
         echo ""
         echo ":: Location ::"
@@ -500,7 +500,7 @@ large () {
                 done
                 FNUCANT=1
                 clear
-                echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+                echo "$FNUnam v$FNUVER :: powered by darksky & mapbox"
                 echo ""
                 echo ":: Location ::"
                 echo "$FNULOC" | fmt -w $FNUCOL -c
@@ -519,7 +519,7 @@ large () {
                 done
                 read -p "Press any key to continue... " -n1 -s
                 clear
-                echo "$FNUNAM - v$FNUVER :: powered by darksky & mapbox"
+                echo "$FNUnam v$FNUVER :: powered by darksky & mapbox"
                 echo ""
                 echo ":: Location ::"
                 echo "$FNULOC" | fmt -w $FNUCOL -c
@@ -562,7 +562,7 @@ fnuerror () {
 # -----------------------------------------------------------------------------------
 while :; do
     clear
-    echo "$FNUNAM - v$FNUVER"
+    echo "$FNUnam v$FNUVER"
     echo "powered by darksky & mapbox"
     echo ""
     echo "1. Forecast based on GeoIP"
@@ -575,7 +575,12 @@ while :; do
             FNUIP=$(dig +short myip.opendns.com @resolver1.opendns.com)
             FNUIPAPI=$(curl -s "https://ipapi.co/$FNUIP/json/")
             FNUCTY=$(echo "$FNUIPAPI" | jq -r '.city')
-            #FNUCTY=$(echo $FNUCTY | sed -r 's/\s/_/' | sed -r 's/ae/æ/' | sed -r 's/oe/ø/' | sed -r 's/[åÅ]/a/' | sed -r 's/ae/ä/' | sed -r 's/oe/ö/')
+            FNUCCC=$(echo "$FNUIPAPI" | jq -r '.country')
+            if [[ "$FNUCCC" = "NO" ]]; then
+                FNUCTY=$(echo $FNUCTY | sed -r 's/\s/_/' | sed -r 's/ae/æ/' | sed -r 's/oe/ø/')
+            elif [[ "$FNUCCC" = "SE" ]] || [[ "$FNUCCC" = "DE" ]]; then
+                FNUCTY=$(echo $FNUCTY | sed -r 's/\s/_/' | sed -r 's/ae/ä/' | sed -r 's/oe/ö/')
+            fi
             FNUREG=$(echo "$FNUIPAPI" | jq -r '.region')
             FNULND=$(echo "$FNUIPAPI" | jq -r '.country_name')
             FNULOC=$(echo "$FNUCTY, $FNUREG, $FNULND")
@@ -597,7 +602,7 @@ while :; do
     if [[ "$FNUKEY" = "search" ]]; then
         while :; do
             clear
-            echo "$FNUNAM - v$FNUVER"
+            echo "$FNUnam v$FNUVER"
             echo "powered by darksky & mapbox"
             echo ""
             echo "Search for city or (q)uit:"
@@ -626,7 +631,7 @@ while :; do
         if [ -n "$FNULST" ]; then
             if [ "$FNUCNT" -gt "1" ]; then
                 clear
-                echo "$FNUNAM - v$FNUVER"
+                echo "$FNUnam v$FNUVER"
                 echo "powered by darksky & mapbox"
                 echo ""
                 echo "$FNULST"
