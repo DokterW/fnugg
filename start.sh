@@ -245,7 +245,7 @@ small () {
             ;;
             [aA])
                 clear
-                echo "$FNUnam v$FNUVER"
+                echo "$FNUNAM v$FNUVER"
                 echo "powered by ipapi, darksky & mapbox"
                 echo ""
                 read -s -n1 -p "Press any key to continue... "
@@ -418,7 +418,7 @@ large () {
         #    fi
         #fi
         clear
-        echo "$FNUnam v$FNUVER :: powered by darksky & mapbox"
+        echo "$FNUNAM v$FNUVER :: powered by darksky & mapbox"
         echo "[$FNUDAT]"
         echo ""
         echo ":: Location ::"
@@ -500,7 +500,7 @@ large () {
                 done
                 FNUCANT=1
                 clear
-                echo "$FNUnam v$FNUVER :: powered by darksky & mapbox"
+                echo "$FNUNAM v$FNUVER :: powered by darksky & mapbox"
                 echo ""
                 echo ":: Location ::"
                 echo "$FNULOC" | fmt -w $FNUCOL -c
@@ -519,7 +519,7 @@ large () {
                 done
                 read -p "Press any key to continue... " -n1 -s
                 clear
-                echo "$FNUnam v$FNUVER :: powered by darksky & mapbox"
+                echo "$FNUNAM v$FNUVER :: powered by darksky & mapbox"
                 echo ""
                 echo ":: Location ::"
                 echo "$FNULOC" | fmt -w $FNUCOL -c
@@ -562,7 +562,7 @@ fnuerror () {
 # -----------------------------------------------------------------------------------
 while :; do
     clear
-    echo "$FNUnam v$FNUVER"
+    echo "$FNUNAM v$FNUVER"
     echo "powered by darksky & mapbox"
     echo ""
     echo "1. Forecast based on GeoIP"
@@ -602,7 +602,7 @@ while :; do
     if [[ "$FNUKEY" = "search" ]]; then
         while :; do
             clear
-            echo "$FNUnam v$FNUVER"
+            echo "$FNUNAM v$FNUVER"
             echo "powered by darksky & mapbox"
             echo ""
             echo "Search for city or (q)uit:"
@@ -631,7 +631,7 @@ while :; do
         if [ -n "$FNULST" ]; then
             if [ "$FNUCNT" -gt "1" ]; then
                 clear
-                echo "$FNUnam v$FNUVER"
+                echo "$FNUNAM v$FNUVER"
                 echo "powered by darksky & mapbox"
                 echo ""
                 echo "$FNULST"
