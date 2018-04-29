@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.40
+# fnugg v0.41
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.40"
+FNUVER="0.41"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -206,6 +206,7 @@ small () {
                 FNUSUMWEK[$FNUCANT]=$(echo "$FNUSKYAPI" | jq -r ".daily.data[$FNUCANT].summary")
                 FNUCANT=$(expr $FNUCANT + 1)
             done
+#            FNUTEST=$(echo "$FNUSKYAPI" | jq -r ".flags.units")
             FNUCANT=0
         fi
         clear
@@ -213,6 +214,7 @@ small () {
         echo "$FNULOC" | fmt -w $FNUCOL -c
         echo "[$FNUDAT]"
         echo ""
+#        echo "$FNUTEST"
         if [[ "$FNUPAG" = "-1" ]]; then
             FNUQUT="1"
             echo ":: Current ::"
@@ -658,9 +660,9 @@ while :; do
                         case $FNUKEY in
                             [0-9])
                                 # Location
-                                FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name")
+                                FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name" | sed -r 's/s län//')
                                 # Latitude
-                                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
+                                FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[1]")
                                 # Longitude
                                 FNULON=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[0]")
                                 FNUKEY="fnugg"

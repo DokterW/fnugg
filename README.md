@@ -26,6 +26,9 @@ Install [doghum](https://github.com/DokterW/doghum)
 
 ### Changelog
 
+#### 2018-04-29
+* Bug fix
+
 #### 2018-04-28
 * More minor tweaks
 
