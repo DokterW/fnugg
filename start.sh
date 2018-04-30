@@ -1,12 +1,12 @@
 #!/bin/bash
-# fnugg v0.41
+# fnugg v0.42
 # Made by Dr. Waldijk
 # A simple weather script that fetches weather data from darksky.net.
 # Read the README.md for more info, but you will find more info here below.
 # By running this script you agree to the license terms.
 # Config ----------------------------------------------------------------------------
 FNUNAM="fnugg"
-FNUVER="0.41"
+FNUVER="0.42"
 FNUDIR="$HOME/.dokter/fnugg"
 FNUFLG=$1
 FNUNTC="2400"
@@ -565,7 +565,7 @@ fnuerror () {
 while :; do
     clear
     echo "$FNUNAM v$FNUVER"
-    echo "powered by darksky & mapbox"
+    echo "powered by ipapi, darksky & mapbox"
     echo ""
     echo "1. Forecast based on GeoIP"
     echo "2. Search for city"
@@ -585,7 +585,11 @@ while :; do
             fi
             FNUREG=$(echo "$FNUIPAPI" | jq -r '.region')
             FNULND=$(echo "$FNUIPAPI" | jq -r '.country_name')
-            FNULOC=$(echo "$FNUCTY, $FNUREG, $FNULND")
+            if [[ "$FNUCCC" = "US" ]] || [[ "$FNUCCC" = "CA" ]]; then
+                FNULOC=$(echo "$FNUCTY, $FNUREG, $FNULND")
+            else
+                FNULOC=$(echo "$FNUCTY, $FNULND")
+            fi
             FNULON=$(echo "$FNUIPAPI" | jq -r '.longitude')
             FNULAT=$(echo "$FNUIPAPI" | jq -r '.latitude')
             FNUKEY="fnugg"
@@ -656,11 +660,16 @@ while :; do
                     fnuerror
                     sleep 3s
                 else
-                    if [[ "$FNUKEY" -ge "1" ]] || [[ "$FNUKEY" -le "9" ]]; then
+                    if [[ "$FNUKEY" -ge "0" ]] || [[ "$FNUKEY" -le "9" ]]; then
                         case $FNUKEY in
                             [0-9])
+                                FNUCCC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].context[1].short_code" | tr [:lower:] [:upper:])
                                 # Location
-                                FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name" | sed -r 's/s län//')
+                                if [[ "$FNUCCC" = "US" ]] || [[ "$FNUCCC" = "CA" ]]; then
+                                    FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name")
+                                else
+                                    FNULOC=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].place_name" | cut -d , -f 1,3)
+                                fi
                                 # Latitude
                                 FNULAT=$(echo "$FNUMAPAPI" | jq -r ".features[$FNUKEY].center[1]")
                                 # Longitude
